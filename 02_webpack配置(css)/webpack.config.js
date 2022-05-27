@@ -23,14 +23,43 @@ module.exports = {
           // 先使用css-loader解析css文件
           // 再使用style-loader将css文件内容插入到head中
           "style-loader",
-          "css-loader",
+          {
+            loader: "css-loader",
+            options: {
+              // 表示遇到@import时，引入的文件的css代码会往前几个loader，再执行一次
+              importLoaders: 1,
+            },
+          },
+          "postcss-loader",
+          // {
+          //   loader: "postcss-loader",
+          //   // 为这个loader进行配置
+          //   options: {
+          //     postcssOptions: {
+          //       // 配置这个loader所需要的插件
+          //       // plugins: [require("autoprefixer")],
+          //       // 简写为这种格式，因为postcss-preset-env插件默认配置了autoprefixer，所以可以省略
+          //       plugins: ["postcss-preset-env"],
+          //     },
+          //   },
+          // },
           // { loader: "css-loader" }, // 所使用的loader
         ],
       },
       // 配置less的loader
       {
         test: /\.less$/,
-        use: ["style-loader", "css-loader", "less-loader"],
+        use: [
+          "style-loader",
+          {
+            loader: "css-loader",
+            options: {
+              importLoaders: 2,
+            },
+          },
+          "postcss-loader",
+          "less-loader",
+        ],
       },
     ],
   },
