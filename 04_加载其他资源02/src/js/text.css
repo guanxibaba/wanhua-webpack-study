@@ -1,0 +1,8 @@
+:fullscreen {
+  color: red;
+}
+
+.box {
+  user-select: none;
+  transition: all;
+}

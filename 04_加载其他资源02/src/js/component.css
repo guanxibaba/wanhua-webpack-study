@@ -1,0 +1,6 @@
+@import './text.css';
+@import '../font/iconfont.css';
+
+.box {
+  color: #12345675;
+}

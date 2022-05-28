@@ -1,0 +1,24 @@
+.box {
+  color: red;
+}
+
+:-webkit-full-screen {
+  color: red;
+}
+
+:-ms-fullscreen {
+  color: red;
+}
+
+:fullscreen {
+  color: red;
+}
+
+.box {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  transition: all;
+}
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9qcy9jb21wb25lbnQuY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0UsVUFBVTtBQUNaOztBQUVBO0VBQ0UsVUFBVTtBQUNaOztBQUZBO0VBQ0UsVUFBVTtBQUNaOztBQUZBO0VBQ0UsVUFBVTtBQUNaOztBQUVBO0VBQ0UseUJBQWlCO0tBQWpCLHNCQUFpQjtNQUFqQixxQkFBaUI7VUFBakIsaUJBQWlCO0VBQ2pCLGVBQWU7QUFDakIiLCJmaWxlIjoicmVzdWx0LmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi5ib3gge1xyXG4gIGNvbG9yOiByZWQ7XHJcbn1cclxuXHJcbjpmdWxsc2NyZWVuIHtcclxuICBjb2xvcjogcmVkO1xyXG59XHJcblxyXG4uYm94IHtcclxuICB1c2VyLXNlbGVjdDogbm9uZTtcclxuICB0cmFuc2l0aW9uOiBhbGw7XHJcbn0iXX0= */

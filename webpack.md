@@ -277,3 +277,168 @@ module.exports = {
 ```
 
 可以根据需求来进行设置图片的大小
+
+#### asset module type
+
+在webpack5之前，加载这些资源需要使用一些相关的loader。而在webpack5之后，我们可以直接使用资源模块类型(asset module type)来代替这些loader
+
+`asset/resource`：发送一个单独的文件并导出URL，之前通过file-loader实现
+
+`asset/inline`：导出一个资源的data URL。之前通过url-loader实现
+
+`asset/source`：导出资源的源代码。之前通过使用raw-loader(css-loader)实现
+
+`asset`：根据图片的大小来选择是导出一个单独的文件，还是导出一个资源的data URL
+
+> asset/resource
+
+通过配置`webpack.config.js`：实现file-loader的功能
+
+```javascript
+...
+{
+	test: /\.(jpg|pne?g|gif|bmp)$/,
+	type: "asset/resource",
+},
+```
+
+![image-20220528134934224](E:\练习文件\webpack\webpack.assets\image-20220528134934224.png)
+
+如果想要自定义的文件的输出路径和文件名
+
+```javascript
+{
+  test: /\.(jpg|pne?g|gif|bmp)$/,
+  type: "asset/resource",
+  // 配置自定义导出文件和文件名
+  generator: {
+    filename: "img/[name][hash:6][ext]",
+  },
+},
+或在output配置中配置
+assetModuleFilename: "img/[name][hash:6][ext]"
+```
+
+> asset
+
+```javascript
+{
+    test: /\.(jpg|pne?g|gif|bmp)$/,
+    type: "asset",
+    // 设置导出路径及文件名
+    generator: {
+      filename: "img/[name][hash:6][ext]",
+    },
+    // 设置图片应该是转为base64的大小还是转为URL的资源
+    parser: {
+      dataUrlCondition: {
+        maxSize: 100 * 1024,
+      },
+    },
+ },
+```
+
+==需要打包字体图标用法也是一致的==
+
+#### plugin
+
+现在我们进行重新打包的时候都是需要手动删除打包后的文件，然后再进行打包。这样打包出来的代码才是最新的。但是每次进行打包之前都需要手动删除一下build文件。这样是很麻烦的。我们可以通过plugin来进行自动给我们替换为最新的代码。
+
+==loader用于特定的模块类型继续转换，而plugin可以用于执行跟广泛的任务。比如打包优化，资源管理，环境变量注入等等==。而我们这种场景可以使用`clean-webpack-plugin`
+
+> clean-webpack-plugin
+
+打包时，自动把原本的打包文件替换为最新的
+
+```javascript
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+
+module.exprts = {
+    plugins: [new CleanWebpackPlugin()]
+}
+```
+
+配置完成之后我们每次打包就不需要手动删除打包之后的文件了
+
+> html-webpack-plugin
+
+目前我们所打包的文件内都是没有index.html的，也就是我们打包过后的文件是不能运行的，虽然我们可以手动的添加一个html文件，但是每次打包过后都添加一次，也会显得特别的麻烦。==此时html-webpack-plugin==就可以做这样一件事，可以自动生成一个html文件，并把我们打包完成的js文件引入
+
+`yarn add html-webpack-plugin`，安装完后
+
+```javascript
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+moudle.exports = {
+		plugins: [
+    new CleanWebpackPlugin(),
+    // 配置自动生成index.html
+    new HtmlWebpackPlugin({
+      // 配置生成的index.html 的title
+      title: "hwh webpack",
+      // 我们可以指定html模板让它自动去生成一个这样的模板
+      template: "public/index.html",
+    }),
+  ],
+}
+```
+
+他的工作原理是通过一个ejs的文件的模板去生成的，但是有的时候我们不想要它的模板时，可以自己指定一个模板去生成
+
+> DefinePlugin
+
+在我们自定义的模板中，link中引入了一个icon图标。而这个图标的路径是用一个变量来定义的
+
+![image-20220528163247189](E:\练习文件\webpack\webpack.assets\image-20220528163247189.png)
+
+也就是说我们得有这个全局变量，否则打包的时候就会报错，我们可以通过webpack内输出的一个DefinePlugin内配置全局变量
+
+而我们在打包时，有一些文件是想要webpack直接复制到我们打包好的文件内的，可以通过`copy-webpack-plugin`进行打包复制文件。
+
+```javascript
+const { DefinePlugin } = require("webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+
+module.exports = {
+    plugins: [
+        // 定义全局变量
+        new DefinePlugin({
+          BASE_URL: '"./"',
+        }),
+        // 复制文件
+        new CopyWebpackPlugin({
+          patterns: [
+            {
+              from: "public",
+              // 筛选文件 from下的被ignore的文件不会被复制
+              globOptions: {
+                ignore: ["**/index.html"],
+              },
+            },
+          ],
+        }),
+    ]
+}
+
+```
+
+#### mode
+
+mode的配置，默认是`production`：生产环境，此时打包出来的build文件是经过丑化的。不容易看懂的代码
+
+`development`：开发环境，此时build文件内的代码是比较易读的
+
+CommonJs打包后的源码：`见06_webpack模块化原理下CommonJS下的build.js`
+
+EsModule打包后的源码:`见06_webpack模块化原理下EsModule下的build.js`
+
+#### source-map
+
+我们的代码运行在浏览器上时，通常都是被打包过的，也就是真实跑在浏览器上的代码，与我们编写的源代码是有差异的。比如ES6的代码被转换为ES5的代码。比如代码进行了丑化之类的。
+
+而如果我们的代码在打包运行时，出错了是很难找到出错的位置的，因为浏览器运行的代码并不是我们编写的源代码。
+
+那我们怎么可以让打包过后运行在浏览器的代码与我们编写的代码保持一致呢？==通过source-map可以做到==
+
+它会把已转换的代码，映射到原始的文件，使得浏览器可以重构原始源，并在调试器中显示重建的原始源
+
