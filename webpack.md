@@ -438,7 +438,219 @@ EsModule打包后的源码:`见06_webpack模块化原理下EsModule下的build.j
 
 而如果我们的代码在打包运行时，出错了是很难找到出错的位置的，因为浏览器运行的代码并不是我们编写的源代码。
 
+![image-20220529161900189](E:\练习文件\webpack\webpack.assets\image-20220529161900189.png)
+
 那我们怎么可以让打包过后运行在浏览器的代码与我们编写的代码保持一致呢？==通过source-map可以做到==
 
 它会把已转换的代码，映射到原始的文件，使得浏览器可以重构原始源，并在调试器中显示重建的原始源
+
+通过devtool不同的属性值会做相应的措施
+
+怎么使用source-map呢？
+
+通过生成的source.map文件，在转换的build.js文件内最后一行添加一个注释
+
+`//# sourceMappingURL=common.bundle.js.map`指向这个source-map文件。浏览器会根据注释，查找对应的source-map文件，并根据这个文件还原我们的代码。方便进行调试
+
+生成的source-map文件是会比源文件大的，因此我们可以根据需求设置不同的`devtool`属性值，做出相应的优化
+
+==source-map文件的解析==
+
+`version`：当前使用的版本
+
+`sources`：从哪些文件转换过来的
+
+`names`：转换前的变量和属性名称
+
+`mappings`：source-map用来和源文件映射的信息，一串base64 VLQ编码
+
+`file`：打包后的文件
+
+`sourceContext`：转换前的具体代码信息
+
+`sourceRoot`：所有的sources相对的根目录
+
+> source-map值的解析
+
+`false`：不生成source-map文件
+
+`none`：production模式下的默认值，不生成source-map
+
+`eval`：不生成source-map文件，但是会生成一些对应的文件目录，内的代码与我们的源代码差异很大
+
+`source-map`：生成source-map文件，在build.js文件内有一个注释，指向这个source-map文件
+
+`eval-source-map`：会生成source-map，但是source-map是以DataUrl添加到==eval函数后面的==。不是一个单独的文件
+
+`inline-source-map`：会生成source-map，但是source-map是以DataUrl添加到==build文件后面的==。不是一个单独的文件
+
+`cheap-source-map`：会生成source-map，但是会更加高效，因为如果有报错，他是定义到行的，而正常source-map是定义到列的(准确到是哪一个变量或属性方法出错)
+
+`cheap-module-source-map`：会生成source-map，但对源代码处理会更好。例如我们有一些js文件是使用babel的loader进行转换过再生成的source-map。而使用`cheap-source-map`映射出来的source-map跟我们的源代码会有出入。而`cheap-module-source-map`就不会
+
+`hidden-source-map`：会生成source-map，但是不会对source-map文件进行引用；相当于删除了打包文件中对source-map的引用注释
+
+`nosources-source-map`：会生成sourcemap，但是生成的sourcemap只有错误信息的提示，不会生成源代码文件
+
+**那么在开发中，最佳的实践是什么呢？**
+
+ 开发阶段：推荐使用 source-map或者cheap-module-source-map
+
+​						 这分别是vue和react使用的值，可以获取调试信息，方便快速开发；
+
+ 测试阶段：推荐使用 source-map或者cheap-module-source-map
+
+​						测试阶段我们也希望在浏览器下看到正确的错误提示；
+
+ 发布阶段：false、缺省值（不写）
+
+#### babel
+
+为什么需要babel呢？
+
+在我们的JavaScript中，不是所有的浏览器都会支持新特性，有的浏览器是不兼容ES6的语法的，但是我们也不能把我们的每一句代码都手动进行转换为ES5之前的代码。而babel可以帮助我们进行这以一工作
+
+> 命令行使用babel
+
+babel不一定需要webpack等工具一起配合使用，也可以单独使用
+
+@babel/core：babel的核心代码，必须安装；
+
+@babel/cli：可以让我们在命令行使用babel；
+
+`npm install @babel/cli @babel/core`
+
+使用babel来处理我们的源代码：
+
+src：是源文件的目录；
+
+--out-dir：指定要输出的文件夹dist；
+
+`npx babel src --out-dir dist`
+
+> babel插件的使用
+
+比如我们需要转换箭头函数，那么我们就可以使用箭头函数转换相关的插件：
+
+`npm install @babel/plugin-transform-arrow-functions -D`
+
+`npx babel src --out-dir dist --plugins=@babel/plugin-transform-arrow-functions`
+
+查看转换后的结果：我们会发现 const 并没有转成 var
+
+这是因为 `plugin-transform-arrow-functions`，并没有提供这样的功能；
+
+我们需要使用 `plugin-transform-block-scoping` 来完成这样的功能；
+
+`npm install @babel/plugin-transform-block-scoping -D `
+
+`npx babel src --out-dir dist --plugins=@babel/plugin-transform-block-scoping@babel/plugin-transform-arrow-functions`
+
+但是如果要转换的内容过多，一个个设置是比较麻烦的，我们可以使用预设（preset）
+
+安装@babel/preset-env预设：
+
+`npm install @babel/preset-env -D `
+
+执行命令：`npx babel src --out-dir dist --presets=@babel/preset-env`
+
+> babel的执行原理
+
+![image-20220529201622073](E:\练习文件\webpack\webpack.assets\image-20220529201622073.png)
+
+>  配置babel
+
+在工作中，我们不可能使用命令行来使用babel进行编译。我们可以通过webpack的loader再我们进行打包的时候进行编译
+
+`yarn add babel-loader @babel/core`安装后，在webpack内进行配置。一般我们都会使用预设来加载对应的插件列表，并且将其传递给babel。`yarn add @babel/preset-env`预设会根据我们的js代码用到对应的插件。这样避免管理很多的插件的问题
+
+```javascript
+module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/, // 排除哪些文件
+        use: {"babel-loader",
+        // options: {
+        // 通过插件的方式让其js文件转换成我们想要的代码
+        // plugins: [
+        //   "@babel/plugin-transform-block-scoping",
+        //   "@babel/plugin-transform-arrow-functions",
+        // ],
+        // 通过预设的方式来转换，这样不用下载大量的插件来进行转换
+        // presets: ["@babel/preset-env"],
+        // },
+         }
+      },
+    ],
+  },
+```
+
+我们最终打包的js代码是要跑在浏览器上的，那么如何告知babel我们需要适配的浏览器呢？
+
+可以通过browserslist，或者targets属性
+
+==browserslist==：可以在根目录新建一个.browserslistrc文件，然后再里面配置或者在package.json内使用`browserslist`属性配置
+
+![image-20220529230355014](E:\练习文件\webpack\webpack.assets\image-20220529230355014.png)
+
+==targets属性==
+
+![image-20220529230429383](E:\练习文件\webpack\webpack.assets\image-20220529230429383.png)
+
+#### polyfill
+
+polyfill是什么呢？
+
+比如我们在js代码中使用了一些语法特性，例如promise和Generator，async await之类的。通过babel转换之后也是无法进行转换的。但是有的低版本的浏览器又不支持这种语法时。就可以使用polyfill进行打补丁(转换)
+
+`yarn add core-js regenerator-runtime`安装，然后进行配置(在babel-loader的这个loader上设置exclude筛选不需要打补丁的文件)
+
+==注：以下配置是在根目录新建babel.config.js配置的，当我们需要编译的文件太多时，也可以通过这种方式进行配置==
+
+```javascript
+module.exports = {
+  presets: [
+    [
+      "@babel/preset-env",
+      {
+        //设置以什么样的方式来使用polyfill
+        useBuiltIns: "usage",
+        // 指定corejs版本
+        corejs: 3,
+      },
+    ],
+  ],
+};
+```
+
+> useBuiltIns属性值
+
+==false==
+
+​		打包后的文件不使用polyfill来进行适配；
+
+ 		并且这个时候是不需要设置corejs属性的；
+
+==usage==
+
+ 		会根据源代码中出现的语言特性，自动检测所需要的polyfill； 
+
+​		这样可以确保最终包里的polyfill数量的最小化，打包的包相对会小一些；
+
+==entry==
+
+​			如果我们依赖的某一个库本身使用了某些polyfill的特性，但是因为我们使用的是usage，所以之后用户浏览器			可能会报错； 
+
+​			所以，如果你担心出现这种情况，可以使用 entry； 
+
+​			并且需要在入口文件中添加 **`import 'core-js/stable'; import 'regenerator-runtime/runtime';**
+
+​			这样做会根据 browserslist 目标导入所有的polyfill，但是对应的包也会变大；
+
+> Plugin-transform-runtime
+
+在我们使用`regenerator-runtime`来进行polyfill。默认情况下，添加的所有的特性都是全局的，如果我们正在编写一个工具库是，肯定是不希望污染用户的代码的。而这个时候就可以使用这个插件来完成polyfill功能。它新增的特性都是局部的
+
+![image-20220529231911030](E:\练习文件\webpack\webpack.assets\image-20220529231911030.png)
 
