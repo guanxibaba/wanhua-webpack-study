@@ -630,11 +630,11 @@ module.exports = {
 
 ​		打包后的文件不使用polyfill来进行适配；
 
- 		并且这个时候是不需要设置corejs属性的；
+​		并且这个时候是不需要设置corejs属性的；
 
 ==usage==
 
- 		会根据源代码中出现的语言特性，自动检测所需要的polyfill； 
+​		会根据源代码中出现的语言特性，自动检测所需要的polyfill； 
 
 ​		这样可以确保最终包里的polyfill数量的最小化，打包的包相对会小一些；
 
@@ -654,3 +654,73 @@ module.exports = {
 
 ![image-20220529231911030](E:\练习文件\webpack\webpack.assets\image-20220529231911030.png)
 
+#### 编译typescript
+
+我们在开发中，ts代码是需要编译成js代码才能运行的。`yarn add typescript -D`安装ts。
+
+编译ts需要一个配置文件，可以`npx tsc --init`自动生成。此时就可以使用`npx tsc './src/index.ts'`进行编译了。但是在项目中，我们编写的ts文件有很多，所以不可能每一个文件都在终端输入命令去编译。
+
+此时可以使用ts-loader来进行编译
+
+> ts-loader
+
+`yarn add ts-loader -D`安装这个loader，然后在`webpack.config.js`中对loader进行对应的配置。
+
+```javascript
+{
+    test: /\.ts$/,
+    exclude: /node_modules/,
+    use: "ts-loader",
+ },
+```
+
+之后就可以通过`yarn run build`命令进行打包了
+
+> babel-loader
+
+除了可以使用ts-loader进行编译外，也可以使用babe-loader进行编译
+
+使用Babel进行时需要`yarn add @babel/perset-typescript -D`安装这个预设，让babel对于ts文件也能进行polyfill
+
+安装完后配置`babel.config.js`文件
+
+```javascript
+module.exports = {
+  presets: [
+    [
+      "@babel/preset-env",
+      {
+        useBuiltIns: "usage",
+        corejs: 3,
+      },
+    ],
+    ["@babel/preset-typescript"],
+  ],
+};
+```
+
+并配置`webpack.config.js`文件
+
+```javascript
+{
+    test: /\.ts$/,
+    exclude: /node_modules/,
+    use: "babel-loader",
+ },
+```
+
+配置完后通过`yarn run build`即可打包
+
+==两个loader的优缺点==
+
+`ts-loader`：在编译ts文件时可以做类型检查，也就是当我们的类型有错时，不会打包，会在控制台报错。但是他不会进行polyfill。也就是对于一些新特性不会进行打补丁
+
+`babel-loader`：在编译ts文件不会做类型检测，即使类型有问题。也不会报错，但是可以进行polyfill
+
+==开发中应该选择哪一个呢？==
+
+在开发中我们可以配置一个脚本，让我们在编写代码时可以直接进行类型检测。而打包时使用`babel-loader`。
+
+![image-20220530213018751](E:\练习文件\webpack\webpack.assets\image-20220530213018751.png)
+
+`--watch`,可以在我们每次编写完代码就进行类型检测，`--noEmit`表示不需要生成文件。而我们在编写代码时使用tsc进行类型检测。需要打包时在使用`babel-loader`
