@@ -12,7 +12,7 @@
 
 如果当前所需要编译的文件内的子级文件没有src或src下没有index.js都会报错
 
-![image-20220525221742692](E:\练习文件\webpack\webpack.assets\image-20220525221742692.png)
+![image-20220525221742692](webpack.assets\image-20220525221742692.png)
 
 
 
