@@ -30,7 +30,7 @@
 
 或者不配置`package.json`时。可以cd 到 node_modules的.bin下的webpack再进行打包
 
-![image-20220525224332205](E:\练习文件\webpack\webpack.assets\image-20220525224332205.png)
+![image-20220525224332205](../webpack.assets/image-20220525224332205.png)
 
 #### 配置
 
