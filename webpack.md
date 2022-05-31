@@ -159,7 +159,7 @@ postcss是一个通过JavaScript来转换样式的工具。这个工具可以帮
 
 ![image-20220527201946929](E:\练习文件\webpack\webpack.assets\image-20220527201946929.png)
 
-因为在工作中我们不可能通过终端来对每一个css文件进行加前缀之类的工作。如果css文件过多，则会变得很麻烦。我们可以通过postcss-loader让webpack对齐打包的时候进行处理
+因为在工作中我们不可能通过终端来对每一个css文件进行加前缀之类的工作。如果css文件过多，则会变得很麻烦。我们可以通过postcss-loader让webpack对其打包的时候进行处理
 
 `yarn add postcss-loader -D`安装后通过对`webpack.config.js`进行配置，让webpack在对css代码进行解析打包时，做一些相应的操作
 
@@ -724,3 +724,91 @@ module.exports = {
 ![image-20220530213018751](E:\练习文件\webpack\webpack.assets\image-20220530213018751.png)
 
 `--watch`,可以在我们每次编写完代码就进行类型检测，`--noEmit`表示不需要生成文件。而我们在编写代码时使用tsc进行类型检测。需要打包时在使用`babel-loader`
+
+#### 搭建本地服务
+
+目前我们开发的代码说需要先build进行打包，然后再通过live serve打开index.html进行运行的。但是频繁的打包会影响我们开发的效率。由此，我们希望可以做到，当文件变化时，可以自动的完成编译和展示；
+
+为了完成自动编译，webpack提供了几种可选的方式
+
+> webpack watch mode
+
+在该模式下，webpack依赖图中的所有文件，只要有一个发生了改变，那么代码会重新进行编译
+
+==开启方式==
+
+1. 在`webpack.config.js`配置中，添加`watch:true`
+
+   ![image-20220531100954892](E:\练习文件\webpack\webpack.assets\image-20220531100954892.png)
+
+2. 在`package.json`的webpack启动脚本中添加`--watch`
+
+   ![image-20220531101116512](E:\练习文件\webpack\webpack.assets\image-20220531101116512.png)
+
+> webpack-dev-server
+
+上面的方式可以监听到文件的变化，但是事实上它本身是没有刷新浏览器的功能的，而我们需要在模块发生变更时，会自动给我们实时重载
+
+`yarn add webpack-dev-server -D`安装这一插件，然后添加一个新的脚本
+
+![image-20220531101402916](E:\练习文件\webpack\webpack.assets\image-20220531101402916.png)
+
+当我们输入`yarn run serve`时，不会输出build这个这个打包文件，而是将build文件保存在内存中，当我们模块发生变更时，就会重新进行打包，并刷新浏览器
+
+> webpack-dev-middleware
+
+默认情况下，我们使用webpack-dev-server是已经够用了，但是如果我们想要更好的自由度，可以使用webpack-dev-middleware。
+
+它是一个封装器，可以把webpack处理过的文件发送到一个server中。这个server可以根据我们自己的需求去自定义
+
+![image-20220531101741779](E:\练习文件\webpack\webpack.assets\image-20220531101741779.png)
+
+#### HMR
+
+什么是HMR呢？
+
+称之为模块热更新。指的是程序在运行过程中，替换，添加，删除模块，而无需重新刷新整个页面
+
+HMR通过一下几种方式，来提高开发的速度
+
+1. 不重新加载整个页面，这样可以保留某些应用程序的状态不丢失
+2. 只更新需要变化的内容，节省开发时间
+3. 修改了css,js源代码，会立即在浏览器更新，相当于直接在浏览器的控制台直接修改样式
+
+> 使用HMR
+
+默认情况下，`webpack-dev-server`已经支持了HMR。我们只需要开启即可
+
+在不开启的情况下，当我们修改了源代码之后，整个页面会自动刷新
+
+而我们开启之后，更改内容不会触发浏览器刷新，而是只更新更改部分的内容
+
+![image-20220531102310984](E:\练习文件\webpack\webpack.assets\image-20220531102310984.png)
+
+`webpack.config.js`配置以上属性，并且在文件的根目录上配置
+
+![image-20220531102445316](E:\练习文件\webpack\webpack.assets\image-20220531102445316.png)
+
+配置完成后，当我们监听的模块的依赖图有发生改变时，就会自动更新对应的内容
+
+> 在react中使用
+
+![image-20220531151936888](E:\练习文件\webpack\webpack.assets\image-20220531151936888.png)
+
+> HMR的原理
+
+webpack-dev-server会创建两个服务：提供静态资源的服务(express)和Socket服务
+
+express server负责直接提供静态资源的服务(打包后的资源直接被浏览器请求和解析)
+
+HMR Socket Server是一个socket的长连接
+
+长连接有一个最好的好处就是建立连接后双方可以通信(服务器直接可以发送文件到客户端,双向通信)
+
+当服务器监听到对应的模块发生变化时，会生成两个文件.json文件(通过hash存放更新的位置)和.js文件(存放更新的内容)
+
+通过长连接，可以直接将这两个文件主动发送给客户端(浏览器)
+
+浏览器拿到两个新的文件后，通过HMR runtime机制，加载这两个文件，并且针对修改的模块进行更新
+
+![image-20220531152718254](E:\练习文件\webpack\webpack.assets\image-20220531152718254.png)
