@@ -12,7 +12,7 @@
 
 如果当前所需要编译的文件内的子级文件没有src或src下没有index.js都会报错
 
-![image-20220525221742692](E:\练习文件\webpack\webpack.assets\image-20220525221742692.png)
+![image-20220525221742692](./webpack.assets/image-20220525221742692.png)
 
 
 
@@ -30,7 +30,7 @@
 
 或者不配置`package.json`时。可以cd 到 node_modules的.bin下的webpack再进行打包
 
-![image-20220525224332205](E:\练习文件\webpack\webpack.assets\image-20220525224332205.png)
+![image-20220525224332205](../webpack.assets/image-20220525224332205.png)
 
 #### 配置
 
@@ -724,6 +724,7 @@ module.exports = {
 ![image-20220530213018751](E:\练习文件\webpack\webpack.assets\image-20220530213018751.png)
 
 `--watch`,可以在我们每次编写完代码就进行类型检测，`--noEmit`表示不需要生成文件。而我们在编写代码时使用tsc进行类型检测。需要打包时在使用`babel-loader`
+<<<<<<< HEAD
 
 #### 搭建本地服务
 
@@ -812,3 +813,5 @@ HMR Socket Server是一个socket的长连接
 浏览器拿到两个新的文件后，通过HMR runtime机制，加载这两个文件，并且针对修改的模块进行更新
 
 ![image-20220531152718254](E:\练习文件\webpack\webpack.assets\image-20220531152718254.png)
+=======
+>>>>>>> 5ccfed43f9dacc6476cce44d89a0a22d97e2cc54
