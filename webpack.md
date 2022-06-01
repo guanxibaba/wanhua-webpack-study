@@ -157,7 +157,7 @@ postcss是一个通过JavaScript来转换样式的工具。这个工具可以帮
 
 但是现在这样还是不能进行webpack打包的
 
-![image-20220527201946929](webpack.assets\image-20220527201946929.png)
+![image-20220527201946929](webpack.assets/image-20220527201946929.png)
 
 因为在工作中我们不可能通过终端来对每一个css文件进行加前缀之类的工作。如果css文件过多，则会变得很麻烦。我们可以通过postcss-loader让webpack对其打包的时候进行处理
 
@@ -179,7 +179,7 @@ postcss是一个通过JavaScript来转换样式的工具。这个工具可以帮
 
 当我们使用autoprefixer时，只能对属性进行一些添加前缀的工作，而我们一些属性值例如color的值的十六进制的写法。有的浏览器也是不一定支持的
 
-![image-20220527205042103](webpack.assets\image-20220527205042103.png)
+![image-20220527205042103](webpack.assets/image-20220527205042103.png)
 
 此时我们可以通过`postcss-preset-env`进行转换。
 
@@ -196,7 +196,7 @@ plugins: ["postcss-preset-env"],
 
 配置完后可以发现，当我们在进行打包的时候已经为我们转换好了
 
-![image-20220527205601965](webpack.assets\image-20220527205601965.png)
+![image-20220527205601965](webpack.assets/image-20220527205601965.png)
 
 当我们如果less也需要配置呢？那不是又要跑到less的loader配置下去输入重复的配置吗？
 
@@ -302,7 +302,7 @@ module.exports = {
 },
 ```
 
-![image-20220528134934224](webpack.assets\image-20220528134934224.png)
+![image-20220528134934224](webpack.assets/image-20220528134934224.png)
 
 如果想要自定义的文件的输出路径和文件名
 
@@ -389,7 +389,7 @@ moudle.exports = {
 
 在我们自定义的模板中，link中引入了一个icon图标。而这个图标的路径是用一个变量来定义的
 
-![image-20220528163247189](webpack.assets\image-20220528163247189.png)
+![image-20220528163247189](webpack.assets/image-20220528163247189.png)
 
 也就是说我们得有这个全局变量，否则打包的时候就会报错，我们可以通过webpack内输出的一个DefinePlugin内配置全局变量
 
@@ -438,7 +438,7 @@ EsModule打包后的源码:`见06_webpack模块化原理下EsModule下的build.j
 
 而如果我们的代码在打包运行时，出错了是很难找到出错的位置的，因为浏览器运行的代码并不是我们编写的源代码。
 
-![image-20220529161900189](webpack.assets\image-20220529161900189.png)
+![image-20220529161900189](webpack.assets/image-20220529161900189.png)
 
 那我们怎么可以让打包过后运行在浏览器的代码与我们编写的代码保持一致呢？==通过source-map可以做到==
 
@@ -556,7 +556,7 @@ src：是源文件的目录；
 
 > babel的执行原理
 
-![image-20220529201622073](webpack.assets\image-20220529201622073.png)
+![image-20220529201622073](webpack.assets/image-20220529201622073.png)
 
 >  配置babel
 
@@ -592,11 +592,11 @@ module: {
 
 ==browserslist==：可以在根目录新建一个.browserslistrc文件，然后再里面配置或者在package.json内使用`browserslist`属性配置
 
-![image-20220529230355014](webpack.assets\image-20220529230355014.png)
+![image-20220529230355014](webpack.assets/image-20220529230355014.png)
 
 ==targets属性==
 
-![image-20220529230429383](webpack.assets\image-20220529230429383.png)
+![image-20220529230429383](webpack.assets/image-20220529230429383.png)
 
 #### polyfill
 
@@ -652,7 +652,7 @@ module.exports = {
 
 在我们使用`regenerator-runtime`来进行polyfill。默认情况下，添加的所有的特性都是全局的，如果我们正在编写一个工具库是，肯定是不希望污染用户的代码的。而这个时候就可以使用这个插件来完成polyfill功能。它新增的特性都是局部的
 
-![image-20220529231911030](webpack.assets\image-20220529231911030.png)
+![image-20220529231911030](webpack.assets/image-20220529231911030.png)
 
 #### 编译typescript
 
@@ -721,7 +721,7 @@ module.exports = {
 
 在开发中我们可以配置一个脚本，让我们在编写代码时可以直接进行类型检测。而打包时使用`babel-loader`。
 
-![image-20220530213018751](webpack.assets\image-20220530213018751.png)
+![image-20220530213018751](webpack.assets/image-20220530213018751.png)
 
 `--watch`,可以在我们每次编写完代码就进行类型检测，`--noEmit`表示不需要生成文件。而我们在编写代码时使用tsc进行类型检测。需要打包时在使用`babel-loader`
 <<<<<<< HEAD
@@ -740,11 +740,11 @@ module.exports = {
 
 1. 在`webpack.config.js`配置中，添加`watch:true`
 
-   ![image-20220531100954892](webpack.assets\image-20220531100954892.png)
+   ![image-20220531100954892](webpack.assets/image-20220531100954892.png)
 
 2. 在`package.json`的webpack启动脚本中添加`--watch`
 
-   ![image-20220531101116512](webpack.assets\image-20220531101116512.png)
+   ![image-20220531101116512](webpack.assets/image-20220531101116512.png)
 
 > webpack-dev-server
 
@@ -752,7 +752,7 @@ module.exports = {
 
 `yarn add webpack-dev-server -D`安装这一插件，然后添加一个新的脚本
 
-![image-20220531101402916](webpack.assets\image-20220531101402916.png)
+![image-20220531101402916](webpack.assets/image-20220531101402916.png)
 
 当我们输入`yarn run serve`时，不会输出build这个这个打包文件，而是将build文件保存在内存中，当我们模块发生变更时，就会重新进行打包，并刷新浏览器
 
@@ -762,7 +762,7 @@ module.exports = {
 
 它是一个封装器，可以把webpack处理过的文件发送到一个server中。这个server可以根据我们自己的需求去自定义
 
-![image-20220531101741779](webpack.assets\image-20220531101741779.png)
+![image-20220531101741779](webpack.assets/image-20220531101741779.png)
 
 #### HMR
 
@@ -784,17 +784,17 @@ HMR通过一下几种方式，来提高开发的速度
 
 而我们开启之后，更改内容不会触发浏览器刷新，而是只更新更改部分的内容
 
-![image-20220531102310984](webpack.assets\image-20220531102310984.png)
+![image-20220531102310984](webpack.assets/image-20220531102310984.png)
 
 `webpack.config.js`配置以上属性，并且在文件的根目录上配置
 
-![image-20220531102445316](webpack.assets\image-20220531102445316.png)
+![image-20220531102445316](webpack.assets/image-20220531102445316.png)
 
 配置完成后，当我们监听的模块的依赖图有发生改变时，就会自动更新对应的内容
 
 > 在react中使用
 
-![image-20220531151936888](webpack.assets\image-20220531151936888.png)
+![image-20220531151936888](webpack.assets/image-20220531151936888.png)
 
 > HMR的原理
 
@@ -812,7 +812,7 @@ HMR Socket Server是一个socket的长连接
 
 浏览器拿到两个新的文件后，通过HMR runtime机制，加载这两个文件，并且针对修改的模块进行更新
 
-![image-20220531152718254](webpack.assets\image-20220531152718254.png)
+![image-20220531152718254](webpack.assets/image-20220531152718254.png)
 =======
 #### 路径解析
 
@@ -820,7 +820,7 @@ HMR Socket Server是一个socket的长连接
 
 在output中有一个path属性，他的作用是用于告诉webpack，我们打包好的文件输出在哪里，而publicPath的属性是指定打包后的index.html文件内引用build.js的一个路径。默认是""。也就是当我们打包完成后，index.html里的script标签的src为`<script src='/build.js'></script>`。它的src是由output.publicPath + build.js拼接成的。所以如果publicPath设置有值的话，会被拼接上去
 
-![image-20220601180345709](webpack.assets\image-20220601180345709.png)
+![image-20220601180345709](webpack.assets/image-20220601180345709.png)
 
 ==devServer下static的publicPath==
 
@@ -828,7 +828,7 @@ HMR Socket Server是一个socket的长连接
 
 默认值是/  也就是我们直接访问访问http://localhost:3000就能访问到资源。但是如果设置了值的话，我们在访问时，就必须加上publicPath这个值。否则访问不到。如果设置了这个值，output的publicPath应该与它一致
 
-![image-20220601180816994](webpack.assets\image-20220601180816994.png)
+![image-20220601180816994](webpack.assets/image-20220601180816994.png)
 
 ==devServer下static的directory==
 
@@ -896,7 +896,7 @@ resolve用于设置模块如何被解析：
 ​			在开发中我们会有各种各样的模块依赖，这些模块可能来自于自己编写的代码，也可能来自第三方库；
 
  			resolve可以帮助webpack从每个 require/import 语句中，找到需要引入到合适的模块代码；
-
+ 	
  			webpack 使用 enhanced-resolve 来解析文件路径；
 
 **webpack能解析三种文件路径：**
@@ -908,7 +908,7 @@ resolve用于设置模块如何被解析：
 相对路径
 
  		在这种情况下，使用 import 或 require 的资源文件所处的目录，被认为是上下文目录；
-
+ 	
  		在 import/require 中给定的相对路径，会拼接此上下文路径，来生成模块的绝对路径；
 
 模块路径
@@ -929,5 +929,5 @@ resolve用于设置模块如何被解析：
 
 ​		我们可以给某些常见的路径起一个别名；
 
-![image-20220601191616705](webpack.assets\image-20220601191616705.png)
+![image-20220601191616705](webpack.assets/image-20220601191616705.png)
 
