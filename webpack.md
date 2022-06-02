@@ -895,21 +895,21 @@ resolve用于设置模块如何被解析：
 
 ​			在开发中我们会有各种各样的模块依赖，这些模块可能来自于自己编写的代码，也可能来自第三方库；
 
- 			resolve可以帮助webpack从每个 require/import 语句中，找到需要引入到合适的模块代码；
- 	
- 			webpack 使用 enhanced-resolve 来解析文件路径；
+​			resolve可以帮助webpack从每个 require/import 语句中，找到需要引入到合适的模块代码；
+
+​			webpack 使用 enhanced-resolve 来解析文件路径；
 
 **webpack能解析三种文件路径：**
 
 绝对路径
 
- 		由于已经获得文件的绝对路径，因此不需要再做进一步解析。
+​		由于已经获得文件的绝对路径，因此不需要再做进一步解析。
 
 相对路径
 
- 		在这种情况下，使用 import 或 require 的资源文件所处的目录，被认为是上下文目录；
- 	
- 		在 import/require 中给定的相对路径，会拼接此上下文路径，来生成模块的绝对路径；
+​		在这种情况下，使用 import 或 require 的资源文件所处的目录，被认为是上下文目录；
+
+​		在 import/require 中给定的相对路径，会拼接此上下文路径，来生成模块的绝对路径；
 
 模块路径
 
@@ -931,3 +931,135 @@ resolve用于设置模块如何被解析：
 
 ![image-20220601191616705](webpack.assets/image-20220601191616705.png)
 
+#### 环境分离
+
+在开发中，当我们的webpack.config.js中的配置信息太多了的时候，这个文件会变得越来越不好维护。并且有一些文件是开发时需要，有一些文件时生产时需要。还有一些是在开发和生产都需要的配置。
+
+所以，一般情况下。我们在工作中，最好是对配置进行划分。方便我们维护和管理
+
+> ### 方案一
+
+编写两个不同的配置文件，开发和生产时，通过不同的脚本进行加载不同的配置文件即可
+
+![image-20220602135612830](webpack.assets/image-20220602135612830.png)
+
+> ### 方案二
+
+使用同一个配置文件，通过在脚本中设置参数来区分他们
+
+![image-20220602135713395](webpack.assets/image-20220602135713395.png)
+
+在webpack.common.js文件内，暴露一个函数，这个函数会接收一个参数。通过这个参数来判断当前时什么环境
+
+![image-20220602135848313](webpack.assets/image-20220602135848313.png)
+
+生产环境时，最后一个参数为production:true。而在开发环境时为development：true。
+
+而我们可以在配置文件中去判断这个参数。
+
+```javascript
+const path = require("path");
+
+module.exports = function (env) {
+  console.log("-----", env);
+
+  return {
+    //context的作用用于解析入口和加载器(loader)
+    // 默认是当前的根路径
+    // 如果有配置这个属性的话，就变为了当前配置文件所在的路径
+    context: path.resolve(__dirname, "./"),
+    entry: "../src/js/main.js",
+    output: {
+      filename: "bundle.js",
+      path: path.resolve(__dirname, "../build"),
+    },
+  };
+};
+```
+
+==具体可见代码12_webpack环境分离==
+
+#### 代码分离
+
+它的主要目的是将代码分离到不同的build文件中，之后我们可以按需加载，或者并行加载这些文件
+
+比如默认情况下，所有的js代码在首页全部都加载，就会影响首页的加载速度。
+
+代码分离可以分出更小的build。
+
+使用webpack分离有三种方式
+
+> **入口起点**
+
+我们可以配置多个入口起点。
+
+```javascript
+  // 使用多入口的方式可以对代码进行抽离
+  entry: {
+    // 匹配main.js文件为入口
+    main: "./src/js/main",
+    // 匹配index.js文件为入口
+    index: "./src/index",
+  },
+   output: {
+    // [name] 打包输出时保留入口文件的文件名
+    filename: "[name].bundle.js",
+    path: resolveApp("./build"),
+  },
+  当我们打包的时候就会出现main.build.js和index.build.js
+```
+
+这种方式比较简单，但是如果这两个文件都引用了相同的代码时，他们都会去打包。这样会造成代码重复
+
+> **Entry Dependencies(入口依赖)**
+
+如果在多个文件中，都引用了一些相同的库或者组件时。可以使用这种方法
+
+```javascript
+entry: {
+    // 以对象的形式配置入口
+    index: { import: "./src/index.js", dependOn: "shared" },
+    main: { import: "./src/js/main.js", dependOn: "shared" },
+    // 把代码引入的共同文件都放在这里
+    shared: ["lodash"],
+  },
+output: {
+  // [name] 打包输出时保留入口文件的文件名
+  filename: "[name].bundle.js",
+  path: resolveApp("./build"),
+},
+```
+
+这种方法，开发时并不推荐。
+
+> **splitChunks**
+
+这种方式是使用的SplitChunkPlugin来实现的。webpack已经默认安装和集成该插件。所以我们并不需要单独安装
+
+只需要为该插件提供配置即可
+
+```javascript
+entry: {
+  // 匹配main.js文件为入口
+  main: "./src/js/main",
+  // 匹配index.js文件为入口
+  index: "./src/index",
+ },
+output: {
+  // [name] 打包输出时保留入口文件的文件名
+  filename: "[name].bundle.js",
+  path: resolveApp("./build"),
+},
+  //配置在这个属性内
+ optimization: {
+    splitChunks: {
+      chunks: "all",
+    },
+  },
+```
+
+==chunks==有三个值，async异步请求。例如我们import导入方式是`import("lodash").then(res => {})`这种方式就是异步的。而值为`async`时，只处理异步的。`initial`处理同步，默认的import导入都是同步的。`all`为都处理
+
+使用这种方式打包后会多出几个文件。txt文件为注释文件。486.build.js文件为代码公共部分
+
+![image-20220602220511049](webpack.assets/image-20220602220511049.png)
