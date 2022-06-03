@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkwebpack_devserver=self.webpackChunkwebpack_devserver||[]).push([[113],{628:(e,n,c)=>{c.r(n),c.d(n,{default:()=>t});const s=document.createElement("div");s.innerHTML="Hello Componenet";const t=s}}]);

@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkwebpack_devserver=self.webpackChunkwebpack_devserver||[]).push([[446],{842:(e,s,r)=>{r.r(s);var c=r(212),k=r.n(c);console.log(k()(),"----foo02")}}]);

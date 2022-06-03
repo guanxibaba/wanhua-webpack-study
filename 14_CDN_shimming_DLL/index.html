@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <!-- 使用ejs的if去判断当前是什么环境来决定要不要添加 -->
+  <% if(process.env.NODE_ENV==='production' ) { %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"
+      referrerpolicy="no-referrer"></script>
+    <script crossorigin="anonymous"
+      integrity="sha512-Ot7ArUEhJDU0cwoBNNnWe487kjL5wAOsIYig8llY/l0P2TUFwgsAHVmrZMHsT8NGo+HwkjTJsNErS6QqIkBxDw=="
+      src="https://lib.baomitu.com/dayjs/1.11.2/dayjs.min.js"></script>
+    <% }%>
+</body>
+
+</html>

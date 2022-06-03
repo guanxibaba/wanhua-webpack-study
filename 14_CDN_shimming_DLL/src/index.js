@@ -1,5 +1,5 @@
 import _ from "lodash";
-
+import "./index.css";
 console.log("%cHello World", "color:red;font-size:30px;");
 console.log(_.join(["1", "2", "3"]));
 // 通过设置魔法注释来设置打包后name的值，webpack会解析到这个注释

@@ -949,7 +949,7 @@ resolve用于设置模块如何被解析：
 
 ![image-20220602135713395](webpack.assets/image-20220602135713395.png)
 
-在webpack.common.js文件内，暴露一个函数，这个函数会接收一个参数。通过这个参数来判断当前时什么环境
+在webpack.common.js文件内，暴露一个函数，这个函数会接收一个参数。通过这个参数来判断当前是什么环境
 
 ![image-20220602135848313](webpack.assets/image-20220602135848313.png)
 
@@ -1063,3 +1063,165 @@ output: {
 使用这种方式打包后会多出几个文件。txt文件为注释文件。486.build.js文件为代码公共部分
 
 ![image-20220602220511049](webpack.assets/image-20220602220511049.png)
+
+> **具体的配置信息**
+
+```javascript
+// 使用多入口的方式可以对代码进行抽离
+  entry: {
+    // 匹配main.js文件为入口
+    main: "./src/js/main",
+    // 匹配index.js文件为入口
+    index: "./src/index",
+    // index: { import: "./src/index.js", dependOn: "shared" },
+    // main: { import: "./src/js/main.js", dependOn: "shared" },
+    // shared: ["lodash"],
+  },
+  output: {
+    // [name] 打包输出时保留入口文件的文件名
+    filename: "[name].bundle.js",
+    path: resolveApp("./build"),
+    // 异步引入的文件，会自动打包一个文件。这个属性用于设置它打包后的name。便于区分
+    // 默认情况下，这个id和name打包出来是一致的，如果我们希望修改的话，可以在引入时使用魔法注释来设置
+    chunkFilename: "chunk_[id]_[name].js",
+  },
+  optimization: {
+    splitChunks: {
+      // 不管我们这里设置的是什么，在代码中，如果有异步引入。默认还是会单独打包文件的
+      chunks: "all",
+      // 如果一个包的大小小于这个属性的值，那就不会进行拆分
+      minSize: 100,
+      // 将大于maxSize的包拆分成不小于minSize的包
+      maxSize: 200,
+      // 用于对拆分的包进行分组，也就是我们可以匹配指定的文件
+      // 然后再进行单独的打包
+      cacheGroups: {
+        // 这个键名是自定义的
+        foo: {
+          test: /foo/,
+          filename: "foo_[id].[hash:6].js",
+          // 配置优先级，如果有多个的时候，会根据优先级进行拆分
+          priority: -10,
+        },
+      },
+      // 至少被引入的次数 如果引入的次数不超过这个值，就不会拆分
+      // 但是如果这个包大于了maxSize，那就会拆分，拆分的条件不是按照cacheGroups的条件
+      minChunks: 1,
+      // 最大异步请求数量
+      maxAsyncRequests: 30,
+    },
+    // 用于配置告诉webpack模块的id采用什么算法生成
+    // natural：按照数字的顺序使用id(不推荐)
+    // named 开发时的默认值，一个可读名称的id(开发时推荐)
+    // deterministic 确定性的id，在不同的编译中，使用不同的短数字(打包时推荐)
+    chunkIds: "deterministic",
+  },
+  resolve: {
+    extensions: ["*", ".js", ".jsx", ".json"],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: "hwh webpack",
+      template: "./index.html",
+    }),
+  ],
+```
+
+异步导入的魔法注释
+
+![image-20220603081353603](webpack.assets/image-20220603081353603.png)
+
+> optimization.runtimeChunk配置
+
+配置runtime相关的代码是否抽取到一个单独的chunk中：
+
+​			runtime相关的代码指的是在运行环境中，对模块进行解析、加载、模块信息相关的代码；
+
+​			比如我们的component、bar两个通过import函数相关的代码加载，就是通过runtime代码完成的；
+
+抽离出来后，有利于浏览器缓存的策略： 
+
+​		比如我们修改了业务代码（main），那么runtime和component、bar的chunk是不需要重新加载的；
+
+​		比如我们修改了component、bar的代码，那么main中的代码是不需要重新加载的；
+
+设置的值：
+
+​		true/multiple：针对每个入口打包一个runtime文件；
+
+​		single：打包一个runtime文件；
+
+​		对象：name属性决定runtimeChunk的名称；
+
+#### CDN
+
+CDN称之为内容分发网络，它是指通过相互连接的网络系统，利用最靠近每个用户的服务器。把静态资源发送给用户。来提高性能，可扩展性及低成本
+
+在开发中，我们使用CDN主要有两种方式
+
+方式一：打包所有的静态资源，放到CDN服务器，用户所有的资源都是通过CDN服务器加载的
+
+方式二：一些第三方资源放到CDN服务器上
+
+==如果我们自己有服务器==：则把output的publicPath设置为我们自己的CDN服务器的地址
+
+==使用第三方的CDN服务器==：一些第三方库中，在bootcdn这个网站都能找到他们的CDN服务器的地址。而我们可以通过配置让这个三方库使用CDN服务器进行加载。在webpack的配置文件配置以下属性，并在我们的模板index.html中配置scrip标签。src属性为对应的库的CDN地址
+
+```javascript
+// 需要使用CDN的第三方库
+externals: {
+   // key是库名，value是这个库的顶级对象
+   dayjs: "dayjs",
+},
+    
+```
+
+但是我们这个配置，在开发环境是不需要的，本来开发环境下，已经够快了。所以这个配置在我们生产环境下的webpack配置文件内
+
+而在模板中，我们使用ejs的if去判断当前的script需不需要添加
+
+![image-20220603130934000](webpack.assets/image-20220603130934000.png)
+
+#### css代码抽离
+
+在开发中，我们一般在项目未打包的时候，对于解析css文件，是把它插入到`head`标签内的`style`标签的。但是在生产环境中，我们需要把css文件单独抽离出来打包为一个文件。此时可以使用`mini-css-extract-plugin`这个插件帮助我们完成这件事。
+
+![image-20220603154102612](webpack.assets/image-20220603154102612.png)
+
+![image-20220603154114245](webpack.assets/image-20220603154114245.png)
+
+![image-20220603154129722](webpack.assets/image-20220603154129722.png)
+
+
+
+> **Hash,ContextHash,ChunkHash**
+
+在我们给打包的文件进行命名的时候，会使用placeholder，placeholder中有几个属性比较相似：
+
+​		hash、chunkhash、contenthash
+
+​		hash本身是通过MD4的散列函数处理后，生成一个128位的hash值（32个十六进制）；
+
+hash值的生成和整个项目有关系：
+
+​		比如我们现在有两个入口index.js和main.js； 
+
+​		它们分别会输出到不同的bundle文件中，并且在文件名称中我们有使用hash； 
+
+​		这个时候，如果修改了index.js文件中的内容，那么hash会发生变化；
+
+​		那就意味着两个文件的名称都会发生变化；
+
+chunkhash可以有效的解决上面的问题，它会根据不同的入口进行借来解析来生成hash值：
+
+​		比如我们修改了index.js，那么main.js的chunkhash是不会发生改变的； 
+
+contenthash表示生成的文件hash名称，只和内容有关系：
+
+​		比如我们的index.js，引入了一个style.css，style.css有被抽取到一个独立的css文件中；
+
+​		这个css文件在命名时，如果我们使用的是chunkhash； 
+
+​		那么当index.js文件的内容发生变化时，css文件的命名也会发生变化；
+
+​		这个时候我们可以使用contenthash；
