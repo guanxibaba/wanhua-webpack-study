@@ -1225,3 +1225,68 @@ contenthash表示生成的文件hash名称，只和内容有关系：
 ​		那么当index.js文件的内容发生变化时，css文件的命名也会发生变化；
 
 ​		这个时候我们可以使用contenthash；
+
+#### DLL
+
+DLL是动态连接库，是为软件再windows实现共享函数库的一种实现方式，比如一些第三方的库，需要在多个组件引入。而我们打包时，并不想每次都打包。消耗性能。
+
+而在webpack中也有内置DLL的功能，它指的是==我们将可以共享，并且不经常改变的代码，抽取成一个共享的库==。这个库在之后的编译过程中，会被引入到其他项目的代码中
+
+DLL库的使用分为两步，
+
+1. 打包一个DLL库
+2. 项目中引入DLL库
+
+> **打包一个DLL库**
+
+![image-20220605175610592](webpack.assets/image-20220605175610592.png)
+
+打包完成后可以直接把这个文件夹复制到我们的项目中
+
+> 使用这个DLL库
+
+![image-20220605180305505](webpack.assets/image-20220605180305505.png) 
+
+例如这样配置即可完成
+
+#### Terser
+
+什么是Terser？
+
+​		是一个JavaScript的解释，压缩的工具集
+
+我们在生产环境下打包完成的代码都是被丑化压缩过的代码。而webpack内正是使用的Terser进行压缩的
+
+它是一个独立的工具，可以单独安装
+
+`yarn add terser -g`  || `yarn add terser`
+
+在独立使用中，可以使用命令行来进行使用。他们的配置有很多，具体可查看文档
+
+https://github.com/terser/terser#compress-options
+
+https://github.com/terser/terser#mangle-options
+
+在webpack中使用：默认webpack已经配置好了这类东西的配置。如果这个配置无法满足我们的需求的时候，可以在webpack的`optimization.minimizer`配置中进行相关操作
+
+#### css的压缩
+
+css压缩通常是去除无用空格，因为很难去修改选择器，属性的名称，值等等
+
+对于css的压缩可以使用：css-minimizer-webpack-plugin插件
+
+`yarn add css-minimizer-webpack-plugin`安装
+
+在optimization.minimizer中配置
+
+![image-20220605211628294](webpack.assets/image-20220605211628294.png)
+
+#### scope Hoisting
+
+这个功能是对作用域进行提升，并且让webpack打包后代码更小，运行更快
+
+默认情况下webpack打包会有很多的函数作用域，包括一些最外层的立即执行函数之类的。而它的作用就是把一些函数提升到顶层直接调用，就不会存在多个地方进行引用，导致的性能问题
+
+而在webpack的production中，默认是开启的，如果在开发环境中，我们也想去使用的话，则在webpack的plugins配置中配置
+
+![image-20220605212123603](webpack.assets/image-20220605212123603.png)
