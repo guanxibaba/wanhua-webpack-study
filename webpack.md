@@ -724,7 +724,6 @@ module.exports = {
 ![image-20220530213018751](webpack.assets/image-20220530213018751.png)
 
 `--watch`,可以在我们每次编写完代码就进行类型检测，`--noEmit`表示不需要生成文件。而我们在编写代码时使用tsc进行类型检测。需要打包时在使用`babel-loader`
-<<<<<<< HEAD
 
 #### 搭建本地服务
 
@@ -1290,3 +1289,34 @@ css压缩通常是去除无用空格，因为很难去修改选择器，属性�
 而在webpack的production中，默认是开启的，如果在开发环境中，我们也想去使用的话，则在webpack的plugins配置中配置
 
 ![image-20220605212123603](webpack.assets/image-20220605212123603.png)
+
+#### Tree Shaking
+
+在我们项目中难免会有一些写了但是没有用到代码，而把这些代码打包在内会影响内存。而tree Shaking可以消除我们在项目中定义了但是没有使用的代码
+
+> usedExports
+
+通过标记某些函数是否被使用，之后通过Terser进行优化
+
+mode设置为development时，默认就会开启usedExports
+
+![image-20220611215356812](webpack.assets/image-20220611215356812.png)
+
+在optimization中设置，但是设置了这个属性，也只是会在没有使用过的函数前通过注释去标记而已。真正的优化还需要配置minimize和minimizer属性进行优化
+
+> sideEffects
+
+通过在package.json中配置，可以是布尔值，也可以是数组。如果为布尔值时，则告诉webpack这些未使用的export都是有副作用的，不能删。为false时，则没有副作用，可以删。是一个数组时，则告诉webpack，这个数组内的文件都是有副作用的，不能删，其他的可以
+
+对于css的文件。可以在匹配css文件的loader中，添加sideEffects属性，表示所有的css文件都是有副作用的
+
+#### css的tree Shaking
+
+上面的tree Shaking只能是对js进行优化，而css文件内，有一些没有使用到的样式。我们应该也要进行优化
+
+使用PurgeCss可以对css样式进行优化。
+
+`yarn add purgecss-webpack-plugin`安装插件，并需要用到glob这个插件。默认webpack内置是有这个插件的。
+
+![image-20220611225909825](webpack.assets/image-20220611225909825.png)
+
