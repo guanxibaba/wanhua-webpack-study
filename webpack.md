@@ -1320,3 +1320,26 @@ mode设置为development时，默认就会开启usedExports
 
 ![image-20220611225909825](webpack.assets/image-20220611225909825.png)
 
+#### webpack对HTTP的压缩
+
+HTTP压缩是一种内置在服务器和客户端之间的，以改进传输速度和带宽利用率的方式
+
+HTTP压缩的流程是什么呢？
+
+1. HTTP数据在服务器发送前就已经被压缩了。这个可以在webpack中完成
+2. 兼容的浏览器在向服务器发送请求时，会告知服务器自己支持哪些压缩格式：在请求报文的`Accept-Encoding`字段内
+3. 服务器在浏览器支持的压缩格式下，直接返回对应的压缩后的文件，并且在响应头中告知浏览器。在`Content-Encoding`字段
+
+目前使用较多的压缩格式有gzip和deflate，br的压缩格式有一些浏览器还不兼容
+
+> #### webpack对文件的压缩
+
+`yarn add compresstion-webpack-plugin`安装依赖,引入后配置
+
+![image-20220612100642622](webpack.assets/image-20220612100642622.png)
+
+> **对于HTML文件中的代码的压缩**
+
+在HtmlWebpackPlugin插件中，除了template属性外，还有很多对于html文件内的代码进行压缩的配置
+
+![image-20220612100916455](webpack.assets/image-20220612100916455.png)
