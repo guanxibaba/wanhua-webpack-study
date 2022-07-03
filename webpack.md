@@ -410,7 +410,7 @@ module.exports = {
           patterns: [
             {
               from: "public",
-              // 筛选文件 from下的被ignore的文件不会被复制
+              // 筛选文件 globOptions下的被ignore的文件不会被复制
               globOptions: {
                 ignore: ["**/index.html"],
               },
@@ -1343,3 +1343,61 @@ HTTP压缩的流程是什么呢？
 在HtmlWebpackPlugin插件中，除了template属性外，还有很多对于html文件内的代码进行压缩的配置
 
 ![image-20220612100916455](webpack.assets/image-20220612100916455.png)
+
+#### 为什么webpack修改了配置需要重新build
+
+因为webpack源码中会生成一个compiler，所有的配置(除plugin属性外)都会被注册为plugin。而我们修改了这个其中的配置，说明修改了plugin，所以在这个生命周期的compiler，需要被更新，所以才会需要重新build
+
+#### 自定义loader
+
+loader是用于对模块的源代码进行转换处理，loader本质上是一个导出为函数的JavaScript模块。
+
+在这个函数中，会接收到三个值
+
+context：资源的内容
+
+map：sourcemap相关的数据
+
+meta：一些元数据
+
+> ##### 怎么自定义loader呢？
+
+在webpack的module的rules配置中，在`test`的匹配到的资源，设置`use`值为我们定义loader的文件的路径，相对于context属性的路径。
+
+如果不想写路径的时候，可以使用`resolveLoader`属性配置webpack找loader的路径。
+
+![image-20220703212422285](webpack.assets/image-20220703212422285.png)
+
+==loader的内容==
+
+![image-20220703212511431](webpack.assets/image-20220703212511431.png)
+
+> loader的执行顺序
+
+loader的执行顺序是从右到左，而loader又分为了两种loader
+
+`NormalLoader`：在执行时，源码内部会使用loaderIndex--，让他从末尾执行
+
+`PitchLoader`：会优先执行，在源码内部使用loaderIndex++，从头执行
+
+==那应该怎样让他改变顺序执行呢==
+
+可以拆分为多个rule对象，通过enforce属性修改执行顺序
+
+enforce一共有四种方式：
+
+ 	默认所有的loader都是normal； 
+
+​	在行内设置的loader是inline（在前面将css加载时讲过，import 'loader1!loader2!./test.js'）；
+
+​	也可以通过enforce设置 pre 和 post； 
+
+在**Pitching**和**Normal**它们的执行顺序分别是：
+
+`Pitching`：post, inline, normal, pre； 
+
+ `Normal`：pre, normal, inline, post；
+
+![image-20220703230326671](webpack.assets/image-20220703230326671.png)
+
+![image-20220703230404065](webpack.assets/image-20220703230404065.png)
