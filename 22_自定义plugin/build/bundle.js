@@ -1,0 +1,1 @@
+console.log("我的第一个自定义plugin");

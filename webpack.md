@@ -1401,3 +1401,101 @@ enforce一共有四种方式：
 ![image-20220703230326671](webpack.assets/image-20220703230326671.png)
 
 ![image-20220703230404065](webpack.assets/image-20220703230404065.png)
+
+> ##### 同步loader和异步loader
+
+默认创建的loader就是同步的loader。
+
+loader必须有返回结果，而在同步loader中可以使用`return`或`this.callback`来返回
+
+在有错误的情况下，使用`this.callback`进行返回，第一个值是错误，第二个值是内容
+
+正常情况都使用`return`返回
+
+==异步loader==
+
+有时候我们希望使用loader进行一些异步的操作，再操作完异步后才返回结果。而同步代码不会等待异步执行
+
+这个时候就需要用到loader-runner提供的方法`this.async`
+
+![image-20220704221551670](webpack.assets/image-20220704221551670.png)
+
+> ##### 定义loader传参和接收参数
+
+在使用loader时，我们可以可以配置`options`给loader传递参数，而对应的loader内部使用loader-utils三方库的getOptions方法传入上下文就能获取到我们配置的options了
+
+![image-20220705072043669](webpack.assets/image-20220705072043669.png)
+
+> ##### 检验参数
+
+检验传入的参数是否符合我们的要求
+
+![image-20220705072224437](webpack.assets/image-20220705072224437.png)
+
+#### 自定义plugin
+
+我们想要自定义插件的前提得先学会使用Tapable这个库
+
+Tapable是webpack官方编写和维护的一个库，用于管理Hook，这些Hook可以被应用到我们的插件中
+
+`yarn add tapable -D`安装这个库
+
+通过类的语法去使用hook注册事件，
+
+Hook又分为同步的和异步的
+
+`同步的`以Sync开头
+
+`异步的`以Async开头
+
+其他的类别：
+
+`bail`：当有返回值时，就不会执行后续注册的事件
+
+`Loop`：当返回值为true，就会反复执行该事件，当返回值的结果为undefined或不返回时，就退出事件
+
+`Waterfall`：当返回值不为undefined时，会将这次的返回结果作为下次事件的第一个参数
+
+`Parallel`：并行，会同时执行一次事件处理回调结束，才执行下一次事件处理回调
+
+`Series`：串行，会等待上一次异步的Hook
+
+==SyncWaterfallHook==
+
+![image-20220709144120941](webpack.assets/image-20220709144120941.png)
+
+
+
+==SyncBailHook==
+
+![image-20220709144439063](webpack.assets/image-20220709144439063.png)
+
+==SyncLoopHook==
+
+![image-20220709144636150](webpack.assets/image-20220709144636150.png)
+
+==AsyncSeriesHook==
+
+![image-20220709150738374](webpack.assets/image-20220709150738374.png)
+
+##### 定义自动上传静态资源plugin
+
+在webpack打包完资源后自动上传到服务器，需要有一个自己的服务器
+
+vscode安装插件，`remote ssh`。
+
+![image-20220709232424899](webpack.assets/image-20220709232424899.png)
+
+安装好插件之后，选择连接，输入密码时，会新弹出一个vscode。然后就可以查看服务器的文件了
+
+> plugin配置文件
+
+![image-20220709232926451](webpack.assets/image-20220709232926451.png)
+
+> webpack配置文件中调用
+
+![image-20220709233046634](webpack.assets/image-20220709233046634.png)
+
+经过以上配置，当我们执行打包命令时，就能够把资源上传到服务器了
+
+![image-20220709233420683](webpack.assets/image-20220709233420683.png)
