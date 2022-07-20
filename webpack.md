@@ -1572,3 +1572,21 @@ gulp给我们提供了一个==src==函数，可以接受一个字符串，为文
 输入`npx gulp 任务名`即可开启监听。在监听时，对文件进行了操作，都会动态的更改输出的文件
 
 ![image-20220712231942042](webpack.assets/image-20220712231942042.png)
+
+#### rollup的使用
+
+rollup也可以用来进行打包，跟webpack的定位非常相似，不过通常项目中使用webpack进行打包。而rollup则用于打包库文件。比较方便
+
+`yarn add rollup -D`安装
+
+![image-20220717145619298](webpack.assets/image-20220717145619298.png)
+
+##### 配置文件
+
+默认文件名为`rollup.config.js`
+
+配置方式跟webpack的配置文件相似
+
+![image-20220717154747241](webpack.assets/image-20220717154747241.png)
+
+在`package.json`内配置=="build": "rollup -c"==即可
