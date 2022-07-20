@@ -1,0 +1,1 @@
+"use strict";var o="Hello World",l=function(o){console.log(o)};l(o);

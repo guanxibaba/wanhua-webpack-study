@@ -1401,3 +1401,192 @@ enforce一共有四种方式：
 ![image-20220703230326671](webpack.assets/image-20220703230326671.png)
 
 ![image-20220703230404065](webpack.assets/image-20220703230404065.png)
+
+> ##### 同步loader和异步loader
+
+默认创建的loader就是同步的loader。
+
+loader必须有返回结果，而在同步loader中可以使用`return`或`this.callback`来返回
+
+在有错误的情况下，使用`this.callback`进行返回，第一个值是错误，第二个值是内容
+
+正常情况都使用`return`返回
+
+==异步loader==
+
+有时候我们希望使用loader进行一些异步的操作，再操作完异步后才返回结果。而同步代码不会等待异步执行
+
+这个时候就需要用到loader-runner提供的方法`this.async`
+
+![image-20220704221551670](webpack.assets/image-20220704221551670.png)
+
+> ##### 定义loader传参和接收参数
+
+在使用loader时，我们可以可以配置`options`给loader传递参数，而对应的loader内部使用loader-utils三方库的getOptions方法传入上下文就能获取到我们配置的options了
+
+![image-20220705072043669](webpack.assets/image-20220705072043669.png)
+
+> ##### 检验参数
+
+检验传入的参数是否符合我们的要求
+
+![image-20220705072224437](webpack.assets/image-20220705072224437.png)
+
+#### 自定义plugin
+
+我们想要自定义插件的前提得先学会使用Tapable这个库
+
+Tapable是webpack官方编写和维护的一个库，用于管理Hook，这些Hook可以被应用到我们的插件中
+
+`yarn add tapable -D`安装这个库
+
+通过类的语法去使用hook注册事件，
+
+Hook又分为同步的和异步的
+
+`同步的`以Sync开头
+
+`异步的`以Async开头
+
+其他的类别：
+
+`bail`：当有返回值时，就不会执行后续注册的事件
+
+`Loop`：当返回值为true，就会反复执行该事件，当返回值的结果为undefined或不返回时，就退出事件
+
+`Waterfall`：当返回值不为undefined时，会将这次的返回结果作为下次事件的第一个参数
+
+`Parallel`：并行，会同时执行一次事件处理回调结束，才执行下一次事件处理回调
+
+`Series`：串行，会等待上一次异步的Hook
+
+==SyncWaterfallHook==
+
+![image-20220709144120941](webpack.assets/image-20220709144120941.png)
+
+
+
+==SyncBailHook==
+
+![image-20220709144439063](webpack.assets/image-20220709144439063.png)
+
+==SyncLoopHook==
+
+![image-20220709144636150](webpack.assets/image-20220709144636150.png)
+
+==AsyncSeriesHook==
+
+![image-20220709150738374](webpack.assets/image-20220709150738374.png)
+
+##### 定义自动上传静态资源plugin
+
+在webpack打包完资源后自动上传到服务器，需要有一个自己的服务器
+
+vscode安装插件，`remote ssh`。
+
+![image-20220709232424899](webpack.assets/image-20220709232424899.png)
+
+安装好插件之后，选择连接，输入密码时，会新弹出一个vscode。然后就可以查看服务器的文件了
+
+> plugin配置文件
+
+![image-20220709232926451](webpack.assets/image-20220709232926451.png)
+
+> webpack配置文件中调用
+
+![image-20220709233046634](webpack.assets/image-20220709233046634.png)
+
+经过以上配置，当我们执行打包命令时，就能够把资源上传到服务器了
+
+![image-20220709233420683](webpack.assets/image-20220709233420683.png)
+
+#### gulp的学习
+
+gulp是一种文件流。可以定义自己的一系列任务，等待任务被执行
+
+基于Stream的构建流
+
+我们可以使用gulp的插件体系来完成某些任务
+
+> gulp相对于webpack的优缺点
+
+- webpack是一个模块化打包工具
+- 可以使用各种不同的loader来加载不同的模块
+- 可以使用各式各样的插件在webpack的生命周期中完成其他的任务。webpack的生命周期贯穿了webpack的整个流程
+- gulp相对于webpack思想更加简单，易用。更适合编写一些自动化的任务。在大型项目上，并不会使用gulp，因为gulp不支持模块化
+
+##### gulp的使用
+
+`yarn add gulp`。首先安装gulp，然后`npm init`创建一个项目
+
+默认的gulp文件名为`gulpfile.js`。如果我们想编写其他需要转义的编程语言，例如typescript和babel
+
+则文件名应为`gulp.ts`和`gulp.babel.js`
+
+在文件内部，我们需要导出一个函数，并且每一个函数都是异步的，我们需要在函数执行完毕时，调用一下回调函数，才不会报错
+
+![image-20220711230704561](webpack.assets/image-20220711230704561.png)
+
+> 公开任务，私有任务，默认任务
+
+在gulp中，又分为了公开任务，私有任务和默认任务
+
+==公开任务==：被导出的任务
+
+==私有任务==：没有被导出的任务
+
+==默认任务==：使用default定义的任务
+
+
+
+> 任务组合
+
+我们每次执行公开任务时，都需要一个一个的去执行，这样会显得很麻烦。而gulp为我们定义了两个组合的方法
+
+==series==：串行任务组合，与任务定义的顺序有关，会等上一个任务执行完再执行下一个任务
+
+==parallel==：并行任务组合，不管定义的顺序如何，都会一起执行
+
+![image-20220711232817451](webpack.assets/image-20220711232817451.png)
+
+![image-20220711233509368](webpack.assets/image-20220711233509368.png)
+
+> gulp打包文件
+
+目前我们所使用gulp还仅限于执行而已。怎么能让像webpack似的，当输入build命令时，会把依赖图内的文件都打包到指定的文件夹。
+
+gulp给我们提供了一个==src==函数，可以接受一个字符串，为文件路径。
+
+例如`'src/*.js'`匹配src下的.js文件。可以匹配多个。`src/**/*.js`匹配src下所有文件夹内的.js文件
+
+生成一个Node流，将所有匹配到的文件读取到内存中，并通过流(Stream)进行处理
+
+==dest==
+
+接受一个输出目录作为参数，把`src`函数匹配的到的所有文件存入到这个参数的路径内。例如`./dist`。则会把文件存入到dist文件夹内。会产生一个Node流，通过该流将内容输入到文件中
+
+==pipe==：这个函数接受一个转换流或可写流。我们想要对文件的内容做一些操作可以在这个函数内使用一些插件
+
+==watch==：可以监听执行的文件的任务，任务可以是多个，使用series函数拼接为多个任务
+
+输入`npx gulp 任务名`即可开启监听。在监听时，对文件进行了操作，都会动态的更改输出的文件
+
+![image-20220712231942042](webpack.assets/image-20220712231942042.png)
+
+#### rollup的使用
+
+rollup也可以用来进行打包，跟webpack的定位非常相似，不过通常项目中使用webpack进行打包。而rollup则用于打包库文件。比较方便
+
+`yarn add rollup -D`安装
+
+![image-20220717145619298](webpack.assets/image-20220717145619298.png)
+
+##### 配置文件
+
+默认文件名为`rollup.config.js`
+
+配置方式跟webpack的配置文件相似
+
+![image-20220717154747241](webpack.assets/image-20220717154747241.png)
+
+在`package.json`内配置=="build": "rollup -c"==即可
